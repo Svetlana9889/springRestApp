@@ -1,10 +1,12 @@
 package com.example.springresttask.controller;
 
+import com.example.springresttask.dto.UserDto;
 import com.example.springresttask.exeption_handing.NoSuchUserException;
 import com.example.springresttask.model.Role;
 import com.example.springresttask.model.User;
 import com.example.springresttask.service.RoleService;
 import com.example.springresttask.service.UserService;
+import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -28,9 +30,12 @@ public class AdminRestController {
 
     private RoleService roleService;
 
-    public AdminRestController(UserService userService, RoleService roleService) {
+    private final ModelMapper modelMapper;
+
+    public AdminRestController(UserService userService, RoleService roleService, ModelMapper modelMapper) {
         this.userService = userService;
         this.roleService = roleService;
+        this.modelMapper = modelMapper;
     }
 
     @GetMapping
@@ -51,8 +56,8 @@ public class AdminRestController {
 
     // работает create
     @PostMapping("/addUser")
-    public ResponseEntity<HttpStatus> addUserView(@RequestBody @Valid User user, BindingResult bindingResult) {
-        userService.save(user);
+    public ResponseEntity<HttpStatus> addUserView(@RequestBody @Valid UserDto userDto) {
+        userService.save(convertToUser(userDto));
         return ResponseEntity.ok(HttpStatus.OK);
     }
 
@@ -78,4 +83,7 @@ public class AdminRestController {
         return (List<Role>) roleService.getAll();
     }
 
+    private User convertToUser(UserDto userDto) {
+        return modelMapper.map(userDto, User.class);
+    }
 }

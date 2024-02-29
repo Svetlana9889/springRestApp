@@ -1,7 +1,9 @@
 package com.example.springresttask.model;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 import org.springframework.security.core.GrantedAuthority;
@@ -28,7 +30,8 @@ import java.util.HashSet;
 
 @Entity
 @Table(name = "user")
-@Data
+@Setter
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 public class User implements UserDetails {
@@ -63,13 +66,6 @@ public class User implements UserDetails {
     )
     private Collection<Role> roles;
 
-    public Collection<String> getRoleNames() {
-        Collection<String> roleNames = new ArrayList<>();
-        for (Role role : roles) {
-            roleNames.add(role.getName());
-        }
-        return roleNames;
-    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
