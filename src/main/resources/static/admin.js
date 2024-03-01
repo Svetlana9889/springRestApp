@@ -11,19 +11,19 @@ async function allUsers() {
     fetch("http://localhost:8080/api/admin")
         .then(r => r.json())
         .then(data => {
-            data.forEach(user => {
+            data.forEach(userDto => {
                 let users = `$(
                         <tr>
-                            <td>${user.id}</td>
-                            <td>${user.name}</td>
-                            <td>${user.surname}</td>
-                            <td>${user.email}</td>
-                            <td>${user.roles.map(role => " " + role.name.substring(5))}</td>
+<!--                            <td>${user.id}</td>-->
+                            <td>${userDto.name}</td>
+                            <td>${userDto.surname}</td>
+                            <td>${userDto.email}</td>
+                            <td>${userDto.roles.map(role => " " + role.name.substring(5))}</td>
                             <td>
-                                <button type="button" class="btn btn-info" data-toggle="modal" id="buttonEdit" data-action="edit" data-id="${user.id}" data-target="#edit">Edit</button>
+                                <button type="button" class="btn btn-info" data-toggle="modal" id="buttonEdit" data-action="edit" data-id="${userDto.username}" data-target="#edit">Edit</button>
                             </td>
                             <td>
-                                <button type="button" class="btn btn-danger" data-toggle="modal" id="buttonDelete" data-action="delete" data-id="${user.id}" data-target="#delete">Delete</button>
+                                <button type="button" class="btn btn-danger" data-toggle="modal" id="buttonDelete" data-action="delete" data-id="${userDto.username}" data-target="#delete">Delete</button>
                             </td>
                         </tr>)`;
                 table.append(users);
@@ -87,7 +87,7 @@ function deleteUser() {
     const deleteForm = document.forms["formDeleteUser"];
     deleteForm.addEventListener("submit", function (event) {
         event.preventDefault();
-        fetch("http://localhost:8080/api/admin/removeUser/" + deleteForm.id.value, {
+        fetch("http://localhost:8080/api/admin/removeUser/" + deleteForm.username.value, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json'
@@ -107,15 +107,16 @@ function deleteUser() {
 $(document).ready(function () {
     $('#delete').on("show.bs.modal", function (event) {
         const button = $(event.relatedTarget);
-        const id = button.data("id");
-        viewDeleteModal(id);
+        const username = button.data("username");
+        console.log("Username перед вызовом функции getUser:", username);
+        viewDeleteModal(username);
     })
 })
 
-async function viewDeleteModal(id) {
-    let userDelete = await getUser(id);
+async function viewDeleteModal(username) {
+    let userDelete = await getUser(username);
     let formDelete = document.forms["formDeleteUser"];
-    formDelete.id.value = userDelete.id;
+    // formDelete.id.value = userDelete.id;
     formDelete.name.value = userDelete.name;
     formDelete.surname.value = userDelete.surname;
     formDelete.email.value = userDelete.email;
@@ -145,9 +146,20 @@ async function viewDeleteModal(id) {
         })
 }
 
-async function getUser(id) {
+// async function getUser(username) {
+//
+//     let url = "http://localhost:8080/api/admin/" + username;
+//     let response = await fetch(url);
+//     return await response.json();
+// }
+async function getUser(username) {
+    if (!username) {
+        // Handle the case where username is not provided
+        console.error("Username is missing");
+        return null;
+    }
 
-    let url = "http://localhost:8080/api/admin/" + id;
+    let url = "http://localhost:8080/api/admin/" + username;
     let response = await fetch(url);
     return await response.json();
 }
@@ -164,13 +176,13 @@ function editCurrentUser() {
             })
         }
 
-        fetch("http://localhost:8080/api/admin/addOrUpdate/" + editForm.id.value, {
+        fetch("http://localhost:8080/api/admin/addOrUpdate/" + editForm.username.value, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                id: editForm.id.value,
+                // id: editForm.id.value,
                 name: editForm.name.value,
                 surname: editForm.surname.value,
                 email: editForm.email.value,
@@ -190,15 +202,15 @@ function editCurrentUser() {
 $(document).ready(function () {
     $('#edit').on("show.bs.modal", function (event) {
         const button = $(event.relatedTarget);
-        const id = button.data("id");
-        viewEditModal(id);
+        const username = button.data("username");
+        viewEditModal(username);
     })
 })
 
-async function viewEditModal(id) {
-    let userEdit = await getUser(id);
+async function viewEditModal(username) {
+    let userEdit = await getUser(username);
     let form = document.forms["formEditUser"];
-    form.id.value = userEdit.id;
+    // form.id.value = userEdit.id;
     form.name.value = userEdit.name;
     form.surname.value = userEdit.surname;
     form.email.value = userEdit.email;

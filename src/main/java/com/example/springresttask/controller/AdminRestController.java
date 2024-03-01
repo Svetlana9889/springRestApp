@@ -6,10 +6,8 @@ import com.example.springresttask.model.Role;
 import com.example.springresttask.model.User;
 import com.example.springresttask.service.RoleService;
 import com.example.springresttask.service.UserService;
-import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -30,50 +28,46 @@ public class AdminRestController {
 
     private RoleService roleService;
 
-    private final ModelMapper modelMapper;
-
-    public AdminRestController(UserService userService, RoleService roleService, ModelMapper modelMapper) {
+    public AdminRestController(UserService userService, RoleService roleService) {
         this.userService = userService;
         this.roleService = roleService;
-        this.modelMapper = modelMapper;
     }
 
     @GetMapping
-    public List<User> indexView() {
-        return (List<User>) userService.findAll();
+    public List<UserDto> indexView() {
+        return (List<UserDto>) userService.findAll();
     }
 
     // получение юзера по айди
-    @GetMapping("/{id}")
-    public User getUserById(@PathVariable("id") long id) {
-        User user = userService.findById(id);
-        if (user == null) {
-            throw new NoSuchUserException("there is no user with ID = " +
-                    id + " in Database");
+    @GetMapping("/{username}")
+    public UserDto getUserBySurname(@PathVariable("username") String username) {
+        UserDto userDto = userService.findByUsername(username);
+        if (userDto == null) {
+            throw new NoSuchUserException("there is no user with username = " +
+                    username + " in Database");
         }
-        return user;
+        return userDto;
     }
 
     // работает create
     @PostMapping("/addUser")
     public ResponseEntity<HttpStatus> addUserView(@RequestBody @Valid UserDto userDto) {
-        userService.save(convertToUser(userDto));
+        userService.save(userDto);
         return ResponseEntity.ok(HttpStatus.OK);
     }
 
     // работает edit
-    @PutMapping("/addOrUpdate/{id}")
-    public ResponseEntity<HttpStatus> add(@RequestBody @Valid User user, @PathVariable("id") long id,
-                                          BindingResult bindingResult) {
-        user.setId(id);
-        userService.save(user);
+    @PutMapping("/addOrUpdate/{username}")
+    public ResponseEntity<HttpStatus> add(@RequestBody @Valid UserDto userDto, @PathVariable("username") String username) {
+        userDto.setUsername(username);
+        userService.save(userDto);
         return ResponseEntity.ok(HttpStatus.OK);
     }
 
     // работает
-    @DeleteMapping("/removeUser/{id}")
-    public ResponseEntity<HttpStatus> deleteUser(@PathVariable("id") long id) {
-        userService.delete(id);
+    @DeleteMapping("/removeUser/{username}")
+    public ResponseEntity<HttpStatus> deleteUser(@PathVariable("username") String username) {
+        userService.delete(username);
 //        return "User with ID = " + id + " was deleted";
         return ResponseEntity.ok(HttpStatus.OK);
     }
@@ -83,7 +77,7 @@ public class AdminRestController {
         return (List<Role>) roleService.getAll();
     }
 
-    private User convertToUser(UserDto userDto) {
-        return modelMapper.map(userDto, User.class);
-    }
+//    private User convertToUser(UserDto userDto) {
+//        return modelMapper.map(userDto, User.class);
+//    }
 }
