@@ -146,12 +146,6 @@ async function viewDeleteModal(username) {
         })
 }
 
-// async function getUser(username) {
-//
-//     let url = "http://localhost:8080/api/admin/" + username;
-//     let response = await fetch(url);
-//     return await response.json();
-// }
 async function getUser(username) {
     if (!username) {
         // Handle the case where username is not provided
